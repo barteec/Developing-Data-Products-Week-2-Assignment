@@ -1,0 +1,89 @@
+---
+title: "Developing-Data-Products-Week-2-Assignment"
+output: html
+    toc: true
+    self_contained: true
+---
+
+  
+```{r libraries, include=FALSE}
+library(knitr)
+library(dplyr)
+library(leaflet)
+library(htmltools)
+library(kableExtra)
+library(highcharter)
+library(lubridate)
+library(ggplot2)
+library(data.table)
+
+#set your working directory
+setwd(getwd())
+#Load data. Make sure you loaded the csv files from the github. 
+WinData <- read.csv(file = "./WinData.csv")
+WinInfo <- read.csv(file = "./WinInfo.csv")
+WinLoc <- read.csv(file = "./WinLoc.csv")
+
+```
+
+
+
+
+# General WTG/CWE/AIS Information
+```{r information table1, echo=FALSE, results="asis"}
+cat(paste0("<table width='100%'><tr style='width:100%'>",
+           "<td style='width:50%;padding-right:10px;'>"))
+
+Parkdata <- data.table(WinInfo)
+Parkdata <- melt.data.table(Parkdata, id.vars = "ï..ID_WF")
+Parkdata <- setnames(Parkdata, c("variable", "value"), c("Category", "Information"))
+Parkdata <- Parkdata[,!1, with = F]
+
+
+kable(Parkdata, format = "markdown")
+cat("<font size='2'>*Data used for this table is being updated every month.</font>")
+cat("</td>")
+
+```
+
+
+```{r map, results="asis", echo=FALSE}
+
+turbinesFarmData <- data.table(read.xlsx("D:\\AWP\\AWP-WTGNamelist.xlsx", sheet = 2))
+turbinesFarmData <- filter(turbinesFarmData, Park == SWPARK)
+
+turbinesFarmDataExcluded <-  turbinesFarmData %>%  filter(WTG != SWwtgNumber)
+
+cat("<td style='width:50%;padding-left:10px;'>")
+coloredIcons <- makeIcon(
+                    iconUrl = ifelse(turbinesFarmData$WTG == SWwtgNumber,
+                                     "./icons/red_icon.png",
+                                     "./icons/blue_icon.png"),
+                    iconWidth=25,
+                    iconHeight=43,
+                    iconAnchorX=17,
+                    iconAnchorY=38,
+                    popupAnchorX=1,
+                    popupAnchorY=-40)
+
+turbines <- turbinesFarmData %>% filter(!is.na(Lat) & !is.na(Long))
+
+map <-
+  leaflet() %>%
+  addProviderTiles(providers$Esri.NatGeoWorldMap)
+
+if (nrow(turbines) > 0) {
+  map <- addMarkers(map = map,
+                    data = turbines,
+                    ~ Long,
+                    ~ Lat,
+                    icon = coloredIcons,
+                    popup = paste(turbinesFarmData$Park,
+                                  turbinesFarmData$WTG,
+                                  sep="<br>"))
+}
+map$width <- "150%"
+map$height <- "450px"
+map
+cat("</td></tr></table>")
+```
