@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/721702/7b5925a3c1b84737ac91e8da481d0159
+bundleId: https://api.rpubs.com/api/v1/document/721702/7b5925a3c1b84737ac91e8da481d0159
+url: http://rpubs.com/BBartee/721702
+when: 1612505896.72839
